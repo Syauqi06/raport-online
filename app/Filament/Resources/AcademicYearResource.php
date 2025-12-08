@@ -23,8 +23,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AcademicYearResource extends Resource
 {
     protected static ?string $model = AcademicYear::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $modelLabel = 'Tahun Ajaran'; // Nama buat tombol dan judul
+    protected static ?string $pluralModelLabel = 'Data Tahun Ajaran'; // Nama buat menu sidebar
+    protected static ?string $navigationLabel = 'Tahun Ajaran'; // Label di navigasi
+    protected static ?string $navigationGroup = 'Data Master'; // Grup di navigasi
+    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
     public static function form(Form $form): Form
     {

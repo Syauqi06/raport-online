@@ -19,8 +19,11 @@ use Filament\Tables\Columns\TextColumn;
 class ClassroomResource extends Resource
 {
     protected static ?string $model = Classroom::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $modelLabel = 'Kelas'; // Nama buat tombol dan judul
+    protected static ?string $pluralModelLabel = 'Data Kelas'; // Nama buat menu sidebar
+    protected static ?string $navigationLabel = 'Kelas'; // Label di navigasi
+    protected static ?string $navigationGroup = 'Data Master'; // Grup di navigasi
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     public static function form(Form $form): Form
     {

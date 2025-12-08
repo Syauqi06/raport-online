@@ -18,8 +18,11 @@ use Filament\Tables\Columns\TextColumn;
 class SubjectResource extends Resource
 {
     protected static ?string $model = Subject::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $modelLabel = 'Mata Pelajaran'; // Nama buat tombol dan judul
+    protected static ?string $pluralModelLabel = 'Data Mata Pelajaran'; // Nama buat menu sidebar
+    protected static ?string $navigationLabel = 'Mata Pelajaran'; // Label di navigasi
+    protected static ?string $navigationGroup = 'Data Master'; // Grup di navigasi
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark';
 
     public static function form(Form $form): Form
     {
