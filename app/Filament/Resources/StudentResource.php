@@ -64,6 +64,7 @@ class StudentResource extends Resource
                         DatePicker::make('birth_date')
                             ->label('Tanggal Lahir'),
                         TextInput::make('phone')
+                            ->tel()
                             ->label('No. Telepon'),
                         Textarea::make('address')
                             ->label('Alamat')
@@ -82,14 +83,26 @@ class StudentResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')->label('Nama Siswa')->searchable(),
-                TextColumn::make('classroom.name')->label('Kelas')->sortable(),
-                TextColumn::make('user.email')->label('Email'),
-                TextColumn::make('nisn')->label('NISN')->sortable(),
-                TextColumn::make('nis')->label('NIS')->sortable(),
-                TextColumn::make('birth_place')->label('Tempat Lahir'),
-                TextColumn::make('birth_date')->label('Tanggal Lahir'),
-                TextColumn::make('phone')->label('No. Telepon'),
+                TextColumn::make('user.name')
+                    ->label('Nama Siswa')
+                    ->searchable(),
+                TextColumn::make('classroom.name')
+                    ->label('Kelas')
+                    ->sortable(),
+                TextColumn::make('user.email')
+                    ->label('Email'),
+                TextColumn::make('nisn')
+                    ->label('NISN')
+                    ->sortable(),
+                TextColumn::make('nis')
+                    ->label('NIS')
+                    ->sortable(),
+                TextColumn::make('birth_place')
+                    ->label('Tempat Lahir'),
+                TextColumn::make('birth_date')
+                    ->label('Tanggal Lahir'),
+                TextColumn::make('phone')
+                    ->label('No. Telepon'),
             ])
             ->filters([
                 //
