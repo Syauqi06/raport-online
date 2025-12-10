@@ -71,7 +71,7 @@ class StudentResource extends Resource
                             ->autosize(),
                         Select::make('classroom_id')
                             ->label('Kelas')
-                            ->relationship('classroom', 'name')
+                            ->relationship('classroom', 'name') // Relasi ke tabel Classrooms
                             ->searchable()
                             ->preload()
                             ->required(),

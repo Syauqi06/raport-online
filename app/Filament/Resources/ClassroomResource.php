@@ -41,7 +41,6 @@ class ClassroomResource extends Resource
                         '12' => 'Kelas 12',
                     ])
                     ->required(),
-                // Relasi ke tabel Academic Years
                 Select::make('academic_year_id')
                     ->label('Tahun Ajaran')
                     ->relationship('academicYear', 'name') // Relasi ke tabel Academic Years
@@ -57,9 +56,15 @@ class ClassroomResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->sortable()->searchable()->label('Kelas'),
-                TextColumn::make('level')->label('Tingkat')->sortable(),
-                TextColumn::make('academicYear.name')->label('Tahun Ajaran'), // Menampilkan nama tahun ajaran dari relasi
+                TextColumn::make('name')
+                    ->sortable()
+                    ->searchable()
+                    ->label('Kelas'),
+                TextColumn::make('level')
+                    ->label('Tingkat')
+                    ->sortable(),
+                TextColumn::make('academicYear.name')
+                    ->label('Tahun Ajaran'), // Menampilkan nama tahun ajaran dari relasi
             ])
             ->filters([
                 //

@@ -46,15 +46,21 @@ class SubjectResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('code')->label('Kode')->searchable(),
-                TextColumn::make('name')->label('Nama')->searchable(),
-                TextColumn::make('kkm')->label('KKM'),
+                TextColumn::make('code')
+                    ->label('Kode')
+                    ->searchable(),
+                TextColumn::make('name')
+                    ->label('Nama')
+                    ->searchable(),
+                TextColumn::make('kkm')
+                    ->label('KKM'),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

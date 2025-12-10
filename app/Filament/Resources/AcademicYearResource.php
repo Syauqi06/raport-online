@@ -53,9 +53,15 @@ class AcademicYearResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->sortable()->searchable()->label('Tahun'),
-                TextColumn::make('semester')->sortable()->label('Semester'),
-                ToggleColumn::make('is_active')->label('Status Aktif'),
+                TextColumn::make('name')
+                    ->sortable()
+                    ->searchable()
+                    ->label('Tahun'),
+                TextColumn::make('semester')
+                    ->sortable()
+                    ->label('Semester'),
+                ToggleColumn::make('is_active')
+                    ->label('Status Aktif'),
             ])
             ->defaultSort('name', 'desc')
             ->filters([

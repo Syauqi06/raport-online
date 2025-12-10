@@ -34,6 +34,7 @@ class TeacherResource extends Resource
                     ->schema([
                         TextInput::make('name')
                             ->required()
+                            ->unique(table: 'users', ignoreRecord: true)
                             ->label('Nama Guru'),
                         TextInput::make('email')
                             ->email()
@@ -65,11 +66,13 @@ class TeacherResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
+                TextColumn::make('user.name') // Menampilkan nama dari relasi user
+                    ->searchable()
                     ->label('Nama'),
                 TextColumn::make('nip')
+                    ->searchable()
                     ->label('NIP'),
-                TextColumn::make('user.email')
+                TextColumn::make('user.email') // Menampilkan email dari relasi user
                     ->label('Email'),
             ])
             ->filters([
