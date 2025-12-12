@@ -19,6 +19,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use App\Models\Teacher;
 
 class GradeResource extends Resource
 {
@@ -128,5 +129,45 @@ class GradeResource extends Resource
             'create' => Pages\CreateGrade::route('/create'),
             'edit' => Pages\EditGrade::route('/{record}/edit'),
         ];
-    }    
+    }
+    
+    public static function shouldRegisterNavigation(): bool
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        // Pastikan user sudah login sebelum cek role
+        if (!$user) {
+            return false;
+        }
+
+        return $user->hasRole('admin') || $user->hasRole('guru');
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        // Pastikan user sudah login sebelum cek role
+        if (!$user) {
+            return parent::getEloquentQuery();
+        }
+
+        $query = parent::getEloquentQuery(); // Dapatkan query dasar dari Resource
+
+        // Jika yang login adalah Guru (bukan Admin)
+        if ($user->hasRole('guru')) {
+            $teacher = Teacher::where('user_id', auth()->id())->first(); // Dapatkan data guru berdasarkan user yang login
+            
+            if ($teacher) {
+                return $query->whereHas('teaching', function($q) use ($teacher) { // Filter data berdasarkan guru
+                    $q->where('teacher_id', $teacher->id); // Hanya ambil data penilaian yang diajar oleh guru ini
+                });
+            }
+        }
+
+        // Jika Admin, kembalikan semua data
+        return $query;
+    }
 }

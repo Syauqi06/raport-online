@@ -18,7 +18,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Spatie\Permission\Traits\HasRoles;
 
 class AcademicYearResource extends Resource
 {
@@ -103,5 +103,18 @@ class AcademicYearResource extends Resource
             'create' => Pages\CreateAcademicYear::route('/create'),
             'edit' => Pages\EditAcademicYear::route('/{record}/edit'),
         ];
-    }    
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        // Pastikan user sudah login sebelum cek role
+        if (!$user) {
+            return false;
+        }
+
+        return $user->hasRole('admin');
+    }
 }

@@ -106,5 +106,18 @@ class TeacherResource extends Resource
             'create' => Pages\CreateTeacher::route('/create'),
             'edit' => Pages\EditTeacher::route('/{record}/edit'),
         ];
-    }    
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        // Pastikan user sudah login sebelum cek role
+        if (!$user) {
+            return false;
+        }
+
+        return $user->hasRole('admin');
+    }
 }

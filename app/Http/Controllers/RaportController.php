@@ -12,9 +12,9 @@ class RaportController extends Controller
 {
     public function print()
     {
-         /** 
+        /** 
           * @var \App\Models\User $user 
-         */
+        */
         $user = Auth::user(); // Mendapatkan pengguna yang sedang masuk
         
         if (!$user->hasRole('siswa')) { // Pastikan hanya siswa yang dapat mengakses fungsi ini

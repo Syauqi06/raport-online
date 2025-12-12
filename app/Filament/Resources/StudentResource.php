@@ -135,5 +135,18 @@ class StudentResource extends Resource
             'create' => Pages\CreateStudent::route('/create'),
             'edit' => Pages\EditStudent::route('/{record}/edit'),
         ];
-    }    
+    }
+    
+    public static function shouldRegisterNavigation(): bool
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        // Pastikan user sudah login sebelum cek role
+        if (!$user) {
+            return false;
+        }
+
+        return $user->hasRole('admin');
+    }
 }
