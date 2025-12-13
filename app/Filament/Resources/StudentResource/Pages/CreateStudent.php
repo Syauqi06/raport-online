@@ -7,33 +7,60 @@ use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Filament\Notifications\Notification;
 
 class CreateStudent extends CreateRecord
 {
     protected static string $resource = StudentResource::class;
 
-    // Fungsi ini jalan OTOMATIS saat tombol "Create" ditekan
+
     protected function handleRecordCreation(array $data): Model
     {
-        // Ambil data User dari form (name, email, password)
-        $userData = [ // Siapkan data user
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => $data['password'], // password sudah di-hash di model User
-            'is_active' => true,
-        ];
+        DB::beginTransaction(); // Mulai transaksi database
 
-        // Hapus field yang tidak ada di tabel students
-        unset($data['name']);
-        unset($data['email']);
-        unset($data['password']);
-        unset($data['password_confirmation']); // Untuk konfirmasi password
+        // try-catch untuk menangani error pada proses pembuatan
+        try {
+            $userData = [
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'is_active' => true,
+            ];
 
-        $user = User::create($userData); // Buat data user baru
-        $user->assignRole('siswa'); // Beri role 'siswa' ke user baru
-        $data['user_id'] = $user->id; // Set user_id di data student
+            // Bersihkan data array
+            unset($data['name']);
+            unset($data['email']);
+            unset($data['password']);
+            unset($data['password_confirmation']);
 
-        return static::getModel()::create($data); // Buat data student baru (panggil fungsi bawaan static::getModel()::create)
+            // Buat User dan assign role 'siswa'
+            $user = User::create($userData);
+            $user->assignRole('siswa');
+
+            // Buat data Student dan hubungkan dengan User
+            $data['user_id'] = $user->id;
+            $student = static::getModel()::create($data);
+
+            // lakukan commit jika semua proses berhasil
+            DB::commit();
+
+            return $student;
+
+        } catch (\Exception $e) { // Tangkap error jika ada
+            // Lakukan rollback jika ada error
+            DB::rollBack();
+
+            // Lempar notifikasi error ke layar
+            Notification::make()
+                ->title('Gagal Membuat Siswa')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+
+            // Hentikan proses
+            throw $e;
+        }
     }
 
     protected function getRedirectUrl(): string
