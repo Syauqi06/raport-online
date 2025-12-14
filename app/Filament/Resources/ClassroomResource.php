@@ -29,6 +29,12 @@ class ClassroomResource extends Resource
     {
         return $form
             ->schema([
+                Select::make('teacher_id')
+                    ->label('Wali Kelas') 
+                    ->relationship('homeroomTeacher', 'nip') // Panggil model teacher ke relasi homeroomTeacher di Classroom dan ambil nip
+                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->user->name} ({$record->nip})") // Menampilkan nip dan nama
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('name')
                     ->label('Nama Kelas')
                     ->placeholder('Contoh: X IPA 1')

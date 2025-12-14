@@ -81,10 +81,23 @@
     <div class="footer">
         <p>Jakarta, {{ $date }}</p>
         <p>Mengetahui, <br> Wali Kelas</p>
-        <br><br>
+        
+        <div style="height: 80px; margin: 10px 0;">
+            {{-- Cek apakah ada tanda tangan guru kelas --}}
+            @if($student->classroom && $student->classroom->homeroomTeacher && $student->classroom->homeroomTeacher->signature)
+                {{-- Tampilkan Gambar --}}
+                <img src="{{ public_path('storage/' . $student->classroom->homeroomTeacher->signature) }}" 
+                    style="height: 80px; width: auto;" alt="Tanda Tangan">
+            @else
+                <br><br><br> {{-- Akan kosong jika tidak ada tanda tangan --}}
+            @endif
+        </div>
+
         <div class="signature">
-             {{-- Bisa ambil nama wali kelas dari relasi classroom->homeroom_teacher jika ada --}}
-             ( .................................... )
+            {{-- Nama Wali Kelas --}}
+            {{ $student->classroom->homeroomTeacher->user->name ?? '( Belum Ada Wali Kelas )' }}
+            <br>
+            NIP. {{ $student->classroom->homeroomTeacher->nip ?? '-' }}
         </div>
     </div>
 

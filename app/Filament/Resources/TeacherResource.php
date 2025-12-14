@@ -16,6 +16,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\FileUpload;
 
 class TeacherResource extends Resource
 {
@@ -57,6 +58,11 @@ class TeacherResource extends Resource
                             ->label('No. Telepon'),
                         Textarea::make('address')
                             ->label('Alamat'),
+                        FileUpload::make('signature')
+                            ->label('Scan Tanda Tangan')
+                            ->directory('signatures') // Simpan di folder storage/app/public/signatures
+                            ->image()
+                            ->imageEditor(),
                     ])
 
             ]);
