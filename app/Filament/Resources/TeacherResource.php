@@ -17,6 +17,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\FileUpload;
+use Illuminate\Validation\Rule;
 
 class TeacherResource extends Resource
 {
@@ -35,15 +36,29 @@ class TeacherResource extends Resource
                     ->schema([
                         TextInput::make('name')
                             ->required()
-                            ->unique(table: 'users', ignoreRecord: true)
-                            ->label('Nama Guru'),
+                            ->formatStateUsing(fn ($record) => $record?->user?->name)
+                            ->label('Nama Guru')
+                            ->rule(function ($record) {
+                                if ($record) {
+                                    return Rule::unique('users', 'name')->ignore($record->user_id); // Jangan cek unik jika sedang diedit
+                                }
+                                return 'unique:users,name'; // Jika membuat data baru pakai validasi unik
+                            }),
                         TextInput::make('email')
                             ->email()
+                            ->formatStateUsing(fn ($record) => $record?->user?->email)
                             ->required()
-                            ->unique(table: 'users', ignoreRecord: true),
+                            ->rule(function ($record) {
+                                if ($record) {
+                                    return Rule::unique('users', 'email')->ignore($record->user_id);
+                                }
+                                return 'unique:users,email';
+                            }),
                         TextInput::make('password')
                             ->password()
-                            ->required(fn ($operation) => $operation === 'create'), // Hanya wajib saat membuat data
+                            ->required(fn ($livewire) => $livewire instanceof Pages\CreateTeacher) // Hanya wajib saat membuat data
+                            ->label('Password')
+                            ->dehydrated(fn ($state) => filled($state)), // Hanya simpan jika diisi atau dihapus
                     ]),
 
                 Section::make('Data Profil Guru')
@@ -60,10 +75,12 @@ class TeacherResource extends Resource
                             ->label('Alamat'),
                         FileUpload::make('signature')
                             ->label('Scan Tanda Tangan')
-                            ->directory('signatures') // Simpan di folder storage/app/public/signatures
+                            ->directory('signatures')
                             ->image()
-                            ->imageEditor(),
-                    ])
+                            ->imageEditor()
+                            ->disk('public') // Pastikan disk public
+                            ->visibility('public'), // Pastikan bisa dilihat umum
+                        ])
 
             ]);
     }

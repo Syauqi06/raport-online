@@ -86,7 +86,7 @@
             {{-- Cek apakah ada tanda tangan guru kelas --}}
             @if($student->classroom && $student->classroom->homeroomTeacher && $student->classroom->homeroomTeacher->signature)
                 {{-- Tampilkan Gambar --}}
-                <img src="{{ public_path('storage/' . $student->classroom->homeroomTeacher->signature) }}" 
+                    <img src="file://{{ public_path('storage/' . $student->classroom->homeroomTeacher->signature) }}"
                     style="height: 80px; width: auto;" alt="Tanda Tangan">
             @else
                 <br><br><br> {{-- Akan kosong jika tidak ada tanda tangan --}}

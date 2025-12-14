@@ -49,12 +49,18 @@ class ClassroomResource extends Resource
                     ->required(),
                 Select::make('academic_year_id')
                     ->label('Tahun Ajaran')
-                    ->relationship('academicYear', 'name') // Relasi ke tabel Academic Years
+                    ->relationship(
+                        name: 'academicYear', // Relasi ke AcademicYear
+                        titleAttribute: 'name', 
+                        modifyQueryUsing: fn (Builder $query) => $query->where('is_active', true) // Filter: Hanya yang Aktif
+                    )
                     ->required()
+                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->name} - {$record->semester}")
+                    ->preload()
                     ->createOptionForm([
                         TextInput::make('name')->required(),
                         Select::make('semester')->options(['Ganjil'=>'Ganjil', 'Genap'=>'Genap']),
-                    ])
+                    ]),
             ]);
     }
 

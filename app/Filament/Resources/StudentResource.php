@@ -18,6 +18,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Textarea;
+use Illuminate\Validation\Rule;
 
 class StudentResource extends Resource
 {
@@ -37,16 +38,29 @@ class StudentResource extends Resource
                     ->schema([
                         TextInput::make('name')
                             ->label('Nama Lengkap')
-                            ->required(),
+                            ->formatStateUsing(fn ($record) => $record?->user?->name)
+                            ->required()
+                            ->rule(function ($record) {
+                                if ($record) {
+                                    return Rule::unique('users', 'name')->ignore($record->user_id);
+                                }
+                                return 'unique:users,name';
+                            }),
                         TextInput::make('email')
                             ->label('Email')
                             ->email()
                             ->required()
-                            ->unique(table: 'users', ignoreRecord: true), // Pastikan email unik di tabel users
+                            ->formatStateUsing(fn ($record) => $record?->user?->email)
+                            ->rule(function ($record) {
+                                if ($record) {
+                                    return Rule::unique('users', 'email')->ignore($record->user_id);
+                                }
+                                return 'unique:users,email';
+                            }),
                         TextInput::make('password')
                             ->password()
-                            ->required(fn (string $operation): bool => $operation === 'create') // Hanya wajib saat membuat data
-                            ->dehydrated(fn (?string $state) => filled($state)) // Hanya simpan jika diisi atau dihapus
+                            ->required(fn ($livewire) => $livewire instanceof Pages\CreateStudent) // Hanya wajib saat membuat data 
+                            ->dehydrated(fn ($state) => filled($state)) // Jika kosong maka jangan kirim ke backend
                             ->label('Password'),
                     ]),
                 Section::make('Data Siswa')

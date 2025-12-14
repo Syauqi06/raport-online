@@ -39,24 +39,24 @@ class GradeResource extends Resource
         return $form
         ->schema([
             Select::make('teaching_id')
-            ->label('Kelas & Mapel')
-            ->options(function () {
-                        /** @var \App\Models\User $user */
-                        $user = auth()->user(); // Dapatkan user yang sedang login
+                ->label('Kelas & Mapel')
+                ->options(function () {
+                            /** @var \App\Models\User $user */
+                            $user = auth()->user(); // Dapatkan user yang sedang login
 
-                        $query = Teaching::query()->with(['subject', 'classroom']); // Mulai query ke model Teaching dengan relasi subject dan classroom
+                            $query = Teaching::query()->with(['subject', 'classroom']); // Mulai query ke model Teaching dengan relasi subject dan classroom
 
-                        if ($user->hasRole('guru')) { // Jika yang login adalah guru
-                            $teacher = Teacher::where('user_id', auth()->id())->first(); // Dapatkan data guru berdasarkan user yang login
-                            if ($teacher) {
-                                $query->where('teacher_id', $teacher->id); // Filter hanya untuk kelas yang diajar oleh guru ini
+                            if ($user->hasRole('guru')) { // Jika yang login adalah guru
+                                $teacher = Teacher::where('user_id', auth()->id())->first(); // Dapatkan data guru berdasarkan user yang login
+                                if ($teacher) {
+                                    $query->where('teacher_id', $teacher->id); // Filter hanya untuk kelas yang diajar oleh guru ini
+                                }
                             }
-                        }
 
-                        return $query->get()->mapWithKeys(function ($item) { // Ubah menjadi array key-value
-                            return [$item->id => "{$item->subject->name} - {$item->classroom->name}"]; // Format: "Nama Mapel - Nama Kelas"
-                        });
-                    })
+                            return $query->get()->mapWithKeys(function ($item) { // Ubah menjadi array key-value
+                                return [$item->id => "{$item->subject->name} - {$item->classroom->name}"]; // Format: "Nama Mapel - Nama Kelas"
+                            });
+                        })
                     ->searchable()
                     ->live() // Aktifkan live search untuk memperbarui opsi secara dinamis
                     ->afterStateUpdated(fn (callable $set) => $set('student_id', null)) // jika ganti kelas atau mapel maka siswa juga harus diganti

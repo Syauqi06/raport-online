@@ -47,7 +47,9 @@ class ReportAcknowledgmentResource extends Resource
                     ->label('Waktu Upload'),
                 ImageColumn::make('signature_file')
                     ->label('Bukti Tanda Tangan')
-                    ->disk('public'), // Preview Gambar
+                    ->disk('public') // Agar tampilannya bisa diakses melalui URL
+                    ->visibility('public') // Agar bisa dilihat publik
+                    ->square(), // Agar tampilannya kotak rapi
                 TextColumn::make('parent_note')
                     ->label('Catatan Ortu')
                     ->wrap(),
@@ -114,4 +116,5 @@ class ReportAcknowledgmentResource extends Resource
     }
 
     public static function canCreate(): bool { return false; }
+    public static function canEdit($record): bool { return false; }
 }

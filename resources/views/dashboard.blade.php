@@ -46,11 +46,16 @@
                                 <p class="text-sm mt-2">Catatan Anda: "{{ $ack->parent_note }}"</p>
                             </div>
                         @else
-                            <form action="{{ route('raport.upload') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                        <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+                            <form action="{{ route('raport.upload') }}" method="POST" id="signatureForm" class="space-y-4">    
                                 @csrf
                                 <div>
-                                    <label class="block font-medium text-sm text-gray-700">Upload Foto/Scan Raport (Bagian Tanda Tangan)</label>
-                                    <input type="file" name="signature_file" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                                    <label class="block font-medium text-sm text-gray-700 mb-2">Tanda Tangan di Kotak Ini:</label>
+                                    <div class="border-2 border-gray-300 rounded-md bg-gray-50 touch-none"> <canvas id="signature-pad" class="w-full h-40"></canvas>
+                                    </div>
+
+                                    <button type="button" id="clear" class="text-sm text-red-600 mt-1 hover:underline">Hapus / Ulangi</button>
+                                    <input type="hidden" name="signature_base64" id="signature_base64">
                                 </div>
                                 
                                 <div>
@@ -58,8 +63,8 @@
                                     <textarea name="parent_note" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" rows="3"></textarea>
                                 </div>
 
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
-                                    Kirim ke Wali Kelas
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                    Kirim Tanda Tangan
                                 </button>
                             </form>
                         @endif
@@ -68,4 +73,35 @@
             </div>
         </div>
     </div>
+    <script>
+        var canvas = document.getElementById('signature-pad');
+
+        function resizeCanvas() {
+            var ratio =  Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+        }
+        window.onresize = resizeCanvas;
+        resizeCanvas();
+
+        var signaturePad = new SignaturePad(canvas, {
+            backgroundColor: 'rgba(255, 255, 255, 0)' // Transparan
+        });
+
+        document.getElementById('clear').addEventListener('click', function () {
+            signaturePad.clear();
+        });
+
+        document.getElementById('signatureForm').addEventListener('submit', function (e) {
+            if (signaturePad.isEmpty()) {
+                e.preventDefault();
+                alert("Silakan tanda tangan terlebih dahulu!");
+            } else {
+                // Masukkan data gambar ke input hidden
+                var data = signaturePad.toDataURL('image/png');
+                document.getElementById('signature_base64').value = data;
+            }
+        });
+</script>
 </x-app-layout>
