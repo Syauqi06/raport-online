@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\GradeResource\Pages;
 use App\Filament\Resources\GradeResource\RelationManagers;
 use App\Models\Grade;
+use App\Models\Student;
 use Dom\Text;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -20,6 +21,9 @@ use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Teacher;
+use Filament\Forms\Get;
+use Illuminate\Validation\Rules\Unique;
+use App\Models\Teaching;
 
 class GradeResource extends Resource
 {
@@ -33,20 +37,51 @@ class GradeResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Select::make('teaching_id')
-                    ->label('Kelas & Mapel')
-                    ->relationship('teaching', 'id') // Relasi ke Teaching
-                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->subject->name} - {$record->classroom->name}") // Menampilkan mata pelajaran dan kelas dari relasi Teaching
+        ->schema([
+            Select::make('teaching_id')
+            ->label('Kelas & Mapel')
+            ->options(function () {
+                        /** @var \App\Models\User $user */
+                        $user = auth()->user(); // Dapatkan user yang sedang login
+
+                        $query = Teaching::query()->with(['subject', 'classroom']); // Mulai query ke model Teaching dengan relasi subject dan classroom
+
+                        if ($user->hasRole('guru')) { // Jika yang login adalah guru
+                            $teacher = Teacher::where('user_id', auth()->id())->first(); // Dapatkan data guru berdasarkan user yang login
+                            if ($teacher) {
+                                $query->where('teacher_id', $teacher->id); // Filter hanya untuk kelas yang diajar oleh guru ini
+                            }
+                        }
+
+                        return $query->get()->mapWithKeys(function ($item) { // Ubah menjadi array key-value
+                            return [$item->id => "{$item->subject->name} - {$item->classroom->name}"]; // Format: "Nama Mapel - Nama Kelas"
+                        });
+                    })
                     ->searchable()
-                    ->preload()
+                    ->live() // Aktifkan live search untuk memperbarui opsi secara dinamis
+                    ->afterStateUpdated(fn (callable $set) => $set('student_id', null)) // jika ganti kelas atau mapel maka siswa juga harus diganti
                     ->required(),
                 Select::make('student_id')
                     ->label('Siswa')
-                    ->relationship('student', 'id') // Relasi ke Student
-                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->user->name) // Menampilkan nama siswa dari relasi User
+                    ->options(function (Get $get) {
+                        $teachingId = $get('teaching_id'); // Dapatkan teaching_id dari state form
+
+                        if (!$teachingId) { 
+                            return []; // Jika belum ada teaching_id, kembalikan array kosong
+                        }
+
+                        $teaching = Teaching::find($teachingId); // Dapatkan data Teaching berdasarkan teaching_id
+
+                        if (!$teaching) {
+                            return []; // Jika data Teaching tidak ditemukan, kembalikan array kosong
+                        }
+
+                        return Student::with('user') // Pastikan relasi user dimuat
+                            ->where('classroom_id', $teaching->classroom_id) // Filter siswa berdasarkan classroom_id dari Teaching
+                            ->get()
+                            ->pluck('user.name', 'id'); // Kembalikan array dengan format [id => nama siswa]
+                    })
                     ->searchable()
-                    ->preload()
                     ->required(),
                 Select::make('type')
                     ->label('Jenis Nilai')
@@ -56,6 +91,14 @@ class GradeResource extends Resource
                         'UTS' => 'UTS',
                         'UAS' => 'UAS',
                     ])
+                    ->unique(modifyRuleUsing: function (Unique $rule, Get $get) { // Validasi unik berdasarkan kombinasi student_id, teaching_id, dan type
+                        return $rule
+                            ->where('student_id', $get('student_id')) // Filter berdasarkan student_id
+                            ->where('teaching_id', $get('teaching_id')); // Filter berdasarkan teaching_id
+                        }, ignoreRecord: true) // Hanya validasi unik saat membuat data
+                    // ->validationMessages([ // Customize pesan validasi
+                    //     'unique' => 'Jenis nilai ini sudah ada untuk siswa dan mata pelajaran yang dipilih.',
+                    // ])
                     ->required(),
                 TextInput::make('score')
                     ->label('Nilai')
@@ -129,19 +172,6 @@ class GradeResource extends Resource
             'create' => Pages\CreateGrade::route('/create'),
             'edit' => Pages\EditGrade::route('/{record}/edit'),
         ];
-    }
-    
-    public static function shouldRegisterNavigation(): bool
-    {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-
-        // Pastikan user sudah login sebelum cek role
-        if (!$user) {
-            return false;
-        }
-
-        return $user->hasRole('admin') || $user->hasRole('guru');
     }
 
     public static function getEloquentQuery(): Builder
