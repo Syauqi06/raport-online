@@ -15,37 +15,37 @@ class RaportAcknowledgmentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'signature_base64' => 'required', // Validasi string base64
+            'signed_document' => 'required|mimes:pdf|max:5120',  // Dokumen harus berformat PDF dan maksimal 5 MB
             'parent_note' => 'nullable|string',
         ]);
 
-        // 1. Ambil data Base64
-        $image_64 = $request->signature_base64; // data:image/png;base64,iVBORw0KGgo...
-        
-        // 2. Bersihkan header data (data:image/png;base64,)
-        $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];   // .png
-        $replace = substr($image_64, 0, strpos($image_64, ',')+1); 
-        $image = str_replace($replace, '', $image_64); 
-        $image = str_replace(' ', '+', $image); 
-
-        // 3. Generate Nama File Unik
-        $imageName = 'parent_signatures/' . Str::random(10) . '.' . $extension;
-
-        // 4. Simpan File Fisik ke Storage
-        Storage::disk('public')->put($imageName, base64_decode($image));
-
-        // 5. Simpan ke Database
         $user = Auth::user();
         $student = \App\Models\Student::where('user_id', $user->id)->firstOrFail();
+
         $activeYear = \App\Models\AcademicYear::where('is_active', true)->firstOrFail();
 
-        \App\Models\ReportAcknowledgment::create([
-            'student_id' => $student->id,
-            'academic_year_id' => $activeYear->id,
-            'signature_file' => $imageName, // Simpan path-nya
-            'parent_note' => $request->parent_note,
-        ]);
+        //  Proses Upload File
+        if ($request->hasFile('signed_document')) {
+            // format nama file agar tampilannya lebih rapi
+            $fileName = 'raport_signed_' . str_replace(' ', '_', $student->user->name) . '_' . time() . '.pdf';
+            
+            // Simpan di folder 'signed_raports' di disk public
+            $path = $request->file('signed_document')->storeAs('signed_raports', $fileName, 'public');
+        }
 
-        return redirect()->back()->with('success', 'Tanda tangan berhasil dikirim!');
-    }
+        // Simpan ke Database
+        // pakai updateOrCreate agar jika ortu upload ulang, data lama tertimpa (tidak duplikat)
+        \App\Models\ReportAcknowledgment::updateOrCreate(
+            [
+                'student_id' => $student->id,
+                'academic_year_id' => $activeYear->id,
+            ],
+            [
+                'signature_file' => $path, // Simpan path gambar
+                'parent_note' => $request->parent_note,
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Dokumen raport bertanda tangan berhasil dikirim!');
+        }
 }

@@ -36,7 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Route untuk mencetak raport siswa
-    Route::get('/print-raport', [RaportController::class, 'print'])->name('raport.print');
+    Route::get('/raport/print/{id}', [RaportController::class, 'print'])->name('raport.print');
 });
 
 require __DIR__.'/auth.php';

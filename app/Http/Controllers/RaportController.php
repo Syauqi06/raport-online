@@ -2,38 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Student;
-use App\Models\Grade;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Auth;
-
 class RaportController extends Controller
 {
-    public function print()
+    public function print($id)
     {
-        /** 
-          * @var \App\Models\User $user 
-        */
-        $user = Auth::user(); // Mendapatkan pengguna yang sedang masuk
-        
-        if (!$user->hasRole('siswa')) { // Pastikan hanya siswa yang dapat mengakses fungsi ini
-            abort(403, 'Anda bukan siswa!');
-        }
+        // Cari siswa berdasarkan ID yang dikirim dari tombol
+        $student = \App\Models\Student::with(['classroom.homeroomTeacher', 'user', 'grade'])
+            ->findOrFail($id);
+            
+        // Ambil tahun ajaran aktif
+        $academicYear = \App\Models\AcademicYear::where('is_active', true)->first();
 
-        $student = Student::where('user_id', $user->id)->firstOrFail(); // Mendapatkan data siswa berdasarkan user_id
-
-        $grades = Grade::with(['teaching.subject', 'teaching.classroom']) // Memuat relasi yang diperlukan untuk mendapatkan data nilai
-            ->where('student_id', $student->id) // Memfilter nilai berdasarkan ID siswa
-            ->get();
-
-        $pdf = Pdf::loadView('raport.print', [ // Memuat view untuk PDF
+        // Generate PDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('raport.print', [
             'student' => $student,
-            'grades' => $grades,
-            'date' => now()->translatedFormat('d F Y'), // Tanggal hari ini
+            'academicYear' => $academicYear,
+            'date' => now()->format('d F Y'), // Tanggal cetak
         ]);
 
-        // Download / Stream PDF
-        return $pdf->stream('E-Raport_' . $student->nisn . '.pdf');
+        return $pdf->stream('Raport-' . $student->user->name . '.pdf');
     }
 }

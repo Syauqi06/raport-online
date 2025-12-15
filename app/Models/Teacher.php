@@ -14,6 +14,7 @@ class Teacher extends Model
         'nip',
         'phone',
         'address',
+        'signature',
     ];
 
     // Relasi ke User

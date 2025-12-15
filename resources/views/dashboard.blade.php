@@ -16,8 +16,12 @@
                             <p>Silakan unduh hasil belajar Anda melalui tombol di bawah ini.</p>
                         </div>
 
-                        <a href="{{ route('raport.print') }}" target="_blank" 
-                            class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+                        @php
+                            // cari data siswa berdasarkan user yang login saat ini
+                            $studentId = \App\Models\Student::where('user_id', Auth::id())->value('id');
+                        @endphp
+                        <a href="{{ route('raport.print', $studentId) }}" target="_blank" 
+                            class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             Cetak E-Raport Saya (PDF)
                         </a>
                     @else
@@ -46,25 +50,37 @@
                                 <p class="text-sm mt-2">Catatan Anda: "{{ $ack->parent_note }}"</p>
                             </div>
                         @else
-                        <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-                            <form action="{{ route('raport.upload') }}" method="POST" id="signatureForm" class="space-y-4">    
+                        <form action="{{ route('raport.upload') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                                 @csrf
-                                <div>
-                                    <label class="block font-medium text-sm text-gray-700 mb-2">Tanda Tangan di Kotak Ini:</label>
-                                    <div class="border-2 border-gray-300 rounded-md bg-gray-50 touch-none"> <canvas id="signature-pad" class="w-full h-40"></canvas>
+                                
+                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+                                    <div class="flex">
+                                        <div class="ml-3">
+                                            <p class="text-sm text-blue-700">
+                                                <strong>Instruksi:</strong><br>
+                                                1. Silakan download Raport Siswa (PDF) melalui tombol di atas.<br>
+                                                2. Print dan tanda tangani, ATAU tanda tangani langsung file PDF tersebut secara digital.<br>
+                                                3. Upload kembali file PDF yang sudah bertanda tangan di bawah ini.
+                                            </p>
+                                        </div>
                                     </div>
+                                </div>
 
-                                    <button type="button" id="clear" class="text-sm text-red-600 mt-1 hover:underline">Hapus / Ulangi</button>
-                                    <input type="hidden" name="signature_base64" id="signature_base64">
+                                <div>
+                                    <label class="block font-medium text-sm text-gray-700">Upload Dokumen Raport (PDF)</label>
+                                    {{-- accept=".pdf" membatasi agar user lebih mudah memilih file pdf --}}
+                                    <input type="file" name="signed_document" accept=".pdf" 
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                                    <p class="text-xs text-gray-500 mt-1">Maksimal ukuran file: 5MB.</p>
                                 </div>
                                 
                                 <div>
-                                    <label class="block font-medium text-sm text-gray-700">Catatan untuk Wali Kelas (Opsional)</label>
+                                    <label class="block font-medium text-sm text-gray-700">Catatan (Opsional)</label>
                                     <textarea name="parent_note" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" rows="3"></textarea>
                                 </div>
 
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
-                                    Kirim Tanda Tangan
+                                    Kirim Dokumen ke Wali Kelas
                                 </button>
                             </form>
                         @endif
@@ -73,7 +89,7 @@
             </div>
         </div>
     </div>
-    <script>
+    {{-- <script>
         var canvas = document.getElementById('signature-pad');
 
         function resizeCanvas() {
@@ -86,8 +102,9 @@
         resizeCanvas();
 
         var signaturePad = new SignaturePad(canvas, {
-            backgroundColor: 'rgba(255, 255, 255, 0)' // Transparan
+            backgroundColor: 'rgb(255,255,255)'
         });
+
 
         document.getElementById('clear').addEventListener('click', function () {
             signaturePad.clear();
@@ -103,5 +120,5 @@
                 document.getElementById('signature_base64').value = data;
             }
         });
-</script>
+</script> --}}
 </x-app-layout>

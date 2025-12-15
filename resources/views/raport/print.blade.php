@@ -79,26 +79,54 @@
     </table>
 
     <div class="footer">
-        <p>Jakarta, {{ $date }}</p>
-        <p>Mengetahui, <br> Wali Kelas</p>
-        
-        <div style="height: 80px; margin: 10px 0;">
-            {{-- Cek apakah ada tanda tangan guru kelas --}}
-            @if($student->classroom && $student->classroom->homeroomTeacher && $student->classroom->homeroomTeacher->signature)
-                {{-- Tampilkan Gambar --}}
-                    <img src="file://{{ public_path('storage/' . $student->classroom->homeroomTeacher->signature) }}"
-                    style="height: 80px; width: auto;" alt="Tanda Tangan">
-            @else
-                <br><br><br> {{-- Akan kosong jika tidak ada tanda tangan --}}
-            @endif
-        </div>
+        <br><br>
+        {{-- Layout Tanda Tangan Menggunakan Tabel (Agar Rapi Kiri-Kanan) --}}
+        <table style="width: 100%; border: none;">
+            <tr>
+                {{-- KOLOM KIRI: ORANG TUA / WALI --}}
+                <td style="width: 50%; text-align: center; vertical-align: top;">
+                    <p>
+                        Mengetahui,<br>
+                        Orang Tua / Wali
+                    </p>
+                    
+                    {{-- Space kosong untuk tanda tangan manual orang tua --}}
+                    <div style="height: 80px;"></div>
 
-        <div class="signature">
-            {{-- Nama Wali Kelas --}}
-            {{ $student->classroom->homeroomTeacher->user->name ?? '( Belum Ada Wali Kelas )' }}
-            <br>
-            NIP. {{ $student->classroom->homeroomTeacher->nip ?? '-' }}
-        </div>
+                    <p style="text-decoration: underline; margin-top: 10px;">
+                        ( ........................................ )
+                    </p>
+                </td>
+
+                {{-- KOLOM KANAN: WALI KELAS --}}
+                <td style="width: 50%; text-align: center; vertical-align: top;">
+                    <p>
+                        Jakarta, {{ \Carbon\Carbon::now()->format('d F Y') }}<br>
+                        Wali Kelas
+                    </p>
+
+                    <div style="height: 80px; margin: 10px auto;">
+                        {{-- Cek Data Wali Kelas --}}
+                        @if($student->classroom && $student->classroom->homeroomTeacher && $student->classroom->homeroomTeacher->signature)
+                            {{-- Tampilkan Gambar Tanda Tangan (Pakai file:// agar terbaca sistem) --}}
+                            <img src="file://{{ public_path('storage/' . $student->classroom->homeroomTeacher->signature) }}" 
+                                style="height: 80px; width: auto;" 
+                                alt="Tanda Tangan">
+                        @else
+                            {{-- Jika tidak ada tanda tangan, biarkan kosong --}}
+                            <br><br><br>
+                        @endif
+                    </div>
+
+                    <p style="font-weight: bold; text-decoration: underline;">
+                        {{ $student->classroom->homeroomTeacher->user->name ?? '( Belum Ada Wali Kelas )' }}
+                    </p>
+                    <p>
+                        NIP. {{ $student->classroom->homeroomTeacher->nip ?? '-' }}
+                    </p>
+                </td>
+            </tr>
+        </table>
     </div>
 
 </body>

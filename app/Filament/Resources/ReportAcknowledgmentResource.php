@@ -13,7 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Actions\Action;
 
 class ReportAcknowledgmentResource extends Resource
 {
@@ -39,19 +39,23 @@ class ReportAcknowledgmentResource extends Resource
             ->columns([
                 TextColumn::make('student.user.name')
                     ->label('Siswa')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('academicYear.name')
                     ->label('Tahun Ajaran'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->label('Waktu Upload'),
-                ImageColumn::make('signature_file')
-                    ->label('Bukti Tanda Tangan')
-                    ->disk('public') // Agar tampilannya bisa diakses melalui URL
-                    ->visibility('public') // Agar bisa dilihat publik
-                    ->square(), // Agar tampilannya kotak rapi
+                TextColumn::make('signature_file')
+                    ->label('Dokumen Raport')
+                    ->formatStateUsing(fn () => 'Download PDF') // Label tombol download
+                    ->icon('heroicon-o-document-arrow-down') // Ikon download
+                    ->color('primary')
+                    ->url(fn ($record) => asset('storage/' . $record->signature_file)) // URL dokumen raport
+                    ->openUrlInNewTab(), // Buka di tab baru
                 TextColumn::make('parent_note')
                     ->label('Catatan Ortu')
+                    ->limit(50)
                     ->wrap(),
             ])
             ->filters([
@@ -59,6 +63,11 @@ class ReportAcknowledgmentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('download_pdf')
+                    ->label('Download PDF Raport')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->url(fn ($record) => route('raport.print', ['id' => $record->student_id]))  // URL dokumen raport dengan id siswa
+                    ->openUrlInNewTab(), // Buka di tab baru
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
