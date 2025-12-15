@@ -9,7 +9,7 @@
         .header p { margin: 5px 0; }
         
         .info-table { width: 100%; margin-bottom: 20px; }
-        .info-table td { padding: 5px; }
+        .info-table td { padding: 5px; vertical-align: top; } /* Tambah vertical-align */
         
         .grades-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .grades-table th, .grades-table td { border: 1px solid black; padding: 8px; text-align: center; }
@@ -17,7 +17,6 @@
         .text-left { text-align: left !important; }
         
         .footer { margin-top: 50px; text-align: right; }
-        .signature { margin-top: 60px; font-weight: bold; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -36,7 +35,7 @@
         </tr>
         <tr>
             <td>NISN</td>
-            <td>: {{ $student->nisn }}</td>
+            <td>: {{ $student->nisn ?? '-' }}</td>
             <td>Tahun Ajaran</td>
             <td>: {{ $student->classroom->academicYear->name ?? '-' }}</td>
         </tr>
@@ -49,21 +48,21 @@
             <tr>
                 <th width="5%">No</th>
                 <th width="40%">Mata Pelajaran</th>
-                <th width="15%">KKM</th>
-                <th width="15%">Nilai</th>
-                <th width="15%">Predikat</th>
-                <th width="10%">Ket</th>
+                <th width="10%">KKM</th>
+                <th width="10%">Nilai</th>
+                <th width="10%">Predikat</th>
+                <th width="15%">Ket</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($grades as $index => $grade)
+            @foreach($student->grades as $grade)
             <tr>
-                <td>{{ $index + 1 }}</td>
-                <td class="text-left">{{ $grade->teaching->subject->name }}</td>
-                <td>{{ $grade->teaching->subject->kkm }}</td>
+                <td>{{ $loop->iteration }}</td>
+                <td class="text-left">{{ $grade->teaching?->subject?->name ?? 'Mapel Dihapus' }}</td>
+                <td>{{ $grade->teaching?->subject?->kkm ?? 75 }}</td>
                 <td style="font-weight: bold;">{{ $grade->score }}</td>
                 <td>
-                    {{-- Logika Predikat Sederhana --}}
+                    {{-- Logika Predikat --}}
                     @if($grade->score >= 90) A
                     @elseif($grade->score >= 80) B
                     @elseif($grade->score >= 75) C
@@ -71,7 +70,11 @@
                     @endif
                 </td>
                 <td>
-                    {{ $grade->score >= $grade->teaching->subject->kkm ? 'Lulus' : 'Remedial' }}
+                    {{-- Logika Keterangan --}}
+                    @php
+                        $kkm = $grade->teaching?->subject?->kkm ?? 75;
+                    @endphp
+                    {{ $grade->score >= $kkm ? 'Lulus' : 'Remedial' }}
                 </td>
             </tr>
             @endforeach
@@ -80,7 +83,6 @@
 
     <div class="footer">
         <br><br>
-        {{-- Layout Tanda Tangan Menggunakan Tabel (Agar Rapi Kiri-Kanan) --}}
         <table style="width: 100%; border: none;">
             <tr>
                 {{-- KOLOM KIRI: ORANG TUA / WALI --}}
@@ -90,7 +92,6 @@
                         Orang Tua / Wali
                     </p>
                     
-                    {{-- Space kosong untuk tanda tangan manual orang tua --}}
                     <div style="height: 80px;"></div>
 
                     <p style="text-decoration: underline; margin-top: 10px;">
@@ -101,19 +102,18 @@
                 {{-- KOLOM KANAN: WALI KELAS --}}
                 <td style="width: 50%; text-align: center; vertical-align: top;">
                     <p>
-                        Jakarta, {{ \Carbon\Carbon::now()->format('d F Y') }}<br>
+                        {{-- PERBAIKAN: Gunakan translatedFormat agar bulan jadi bahasa Indonesia (Desember) --}}
+                        Jakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
                         Wali Kelas
                     </p>
 
                     <div style="height: 80px; margin: 10px auto;">
-                        {{-- Cek Data Wali Kelas --}}
                         @if($student->classroom && $student->classroom->homeroomTeacher && $student->classroom->homeroomTeacher->signature)
-                            {{-- Tampilkan Gambar Tanda Tangan (Pakai file:// agar terbaca sistem) --}}
+                            {{-- LOGIKA GAMBAR: Menggunakan file:// + public_path --}}
                             <img src="file://{{ public_path('storage/' . $student->classroom->homeroomTeacher->signature) }}" 
-                                style="height: 80px; width: auto;" 
-                                alt="Tanda Tangan">
+                                 style="height: 80px; width: auto;" 
+                                 alt="Tanda Tangan">
                         @else
-                            {{-- Jika tidak ada tanda tangan, biarkan kosong --}}
                             <br><br><br>
                         @endif
                     </div>

@@ -7,7 +7,7 @@ class RaportController extends Controller
     public function print($id)
     {
         // Cari siswa berdasarkan ID yang dikirim dari tombol
-        $student = \App\Models\Student::with(['classroom.homeroomTeacher', 'user', 'grade'])
+        $student = \App\Models\Student::with(['classroom.homeroomTeacher', 'user', 'grades'])
             ->findOrFail($id);
             
         // Ambil tahun ajaran aktif
