@@ -24,6 +24,9 @@ use App\Models\Teacher;
 use Filament\Forms\Get;
 use Illuminate\Validation\Rules\Unique;
 use App\Models\Teaching;
+use Filament\Tables\Actions\BulkAction;
+use Illuminate\Support\Collection;
+use Filament\Tables\Columns\ToggleColumn;
 
 class GradeResource extends Resource
 {
@@ -108,14 +111,20 @@ class GradeResource extends Resource
                     ->required(),
                 Textarea::make('description')
                     ->label('Catatan Guru'),
-                Toggle::make('is_locked')
-                    ->label('Kunci Nilai?')
-                    ->default(false),
-            ]);
+                ToggleColumn::make('is_locked')
+                    ->label('Status Kunci')
+                    ->onColor('success')  // Hijau = Terkunci (Aman)
+                    ->offColor('danger')  // Merah = Draft (Belum tampil)
+                    ->onIcon('heroicon-s-lock-closed')
+                    ->offIcon('heroicon-s-lock-open')
+                    ->sortable(),
+                ]);
     }
 
     public static function table(Table $table): Table
     {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
         return $table
             ->columns([
                 TextColumn::make('student.user.name') // Kolom untuk menampilkan nama siswa harus akses melalui relasi User
@@ -152,6 +161,25 @@ class GradeResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+                BulkAction::make('lock_grades')
+                    ->label('Kunci Nilai Terpilih')
+                    ->icon('heroicon-o-lock-closed')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->action(function (Collection $records) {
+                        // Update semua yang dipilih jadi is_locked = true
+                        $records->each->update(['is_locked' => true]);
+                }),
+                BulkAction::make('unlock_grades')
+                    ->label('Buka Kunci')
+                    ->icon('heroicon-o-lock-open')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(function (Collection $records) {
+                        $records->each->update(['is_locked' => false]);
+                    })
+                    // Hanya admin yang boleh buka kunci (misalnya)
+                    ->visible(fn () => $user->hasRole('admin')),
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),

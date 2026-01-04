@@ -16,6 +16,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "saade/filament-autograph": "^3.2",
+        "shuvroroy/filament-spatie-laravel-backup": "^2.2",
         "spatie/laravel-backup": "^9.3",
         "spatie/laravel-permission": "^6.23"
     },

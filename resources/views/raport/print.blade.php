@@ -9,7 +9,7 @@
         .header p { margin: 5px 0; }
         
         .info-table { width: 100%; margin-bottom: 20px; }
-        .info-table td { padding: 5px; vertical-align: top; } /* Tambah vertical-align */
+        .info-table td { padding: 5px; vertical-align: top; }
         
         .grades-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .grades-table th, .grades-table td { border: 1px solid black; padding: 8px; text-align: center; }
@@ -58,27 +58,43 @@
             @foreach($student->grades as $grade)
             <tr>
                 <td>{{ $loop->iteration }}</td>
+                
+                {{-- Nama Mapel --}}
                 <td class="text-left">{{ $grade->teaching?->subject?->name ?? 'Mapel Dihapus' }}</td>
-                <td>{{ $grade->teaching?->subject?->kkm ?? 75 }}</td>
-                <td style="font-weight: bold;">{{ $grade->score }}</td>
-                <td>
-                    {{-- Logika Predikat --}}
-                    @if($grade->score >= 90) A
-                    @elseif($grade->score >= 80) B
-                    @elseif($grade->score >= 75) C
-                    @else D
-                    @endif
-                </td>
-                <td>
-                    {{-- Logika Keterangan --}}
-                    @php
-                        $kkm = $grade->teaching?->subject?->kkm ?? 75;
-                    @endphp
-                    {{ $grade->score >= $kkm ? 'Lulus' : 'Remedial' }}
-                </td>
+                
+                {{-- KKM --}}
+                <td>{{ $grade->teaching?->subject?->kkm ?? 80 }}</td>
+
+                {{-- Logika Kunci Nilai --}}
+                @if($grade->is_locked)
+                    {{-- Jika Nilai Sudah Dikunci Maka Tampilkan Nilai dan Predikat --}}
+                    <td style="font-weight: bold;">{{ $grade->score }}</td>
+                    
+                    <td>
+                        {{-- Predikat --}}
+                        @if($grade->score >= 90) A
+                        @elseif($grade->score >= 80) B
+                        @elseif($grade->score >= 75) C
+                        @else D
+                        @endif
+                    </td>
+                    
+                    <td>
+                        {{-- Keterangan --}}
+                        @php $kkm = $grade->teaching?->subject?->kkm ?? 80; @endphp
+                        {{ $grade->score >= $kkm ? 'Lulus' : 'Remedial' }}
+                    </td>
+                @else
+                    {{-- Jika Nilai Belum Dikunci Maka Tampilan Kosong dan Tampilkan Keterangan --}}
+                    <td style="color: #ff0000; font-style: italic;"> - </td>
+                    <td style="color: #ff0000; text-align: center;"> - </td>
+                    <td style="color: red; font-size: 10px; font-style: italic;">
+                        (Draft Nilai)
+                    </td>
+                @endif
             </tr>
             @endforeach
-        </tbody>
+    </tbody>
     </table>
 
     <div class="footer">
@@ -102,14 +118,12 @@
                 {{-- KOLOM KANAN: WALI KELAS --}}
                 <td style="width: 50%; text-align: center; vertical-align: top;">
                     <p>
-                        {{-- PERBAIKAN: Gunakan translatedFormat agar bulan jadi bahasa Indonesia (Desember) --}}
                         Jakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
                         Wali Kelas
                     </p>
 
                     <div style="height: 80px; margin: 10px auto;">
                         @if($student->classroom && $student->classroom->homeroomTeacher && $student->classroom->homeroomTeacher->signature)
-                            {{-- LOGIKA GAMBAR: Menggunakan file:// + public_path --}}
                             <img src="file://{{ public_path('storage/' . $student->classroom->homeroomTeacher->signature) }}" 
                                  style="height: 80px; width: auto;" 
                                  alt="Tanda Tangan">
