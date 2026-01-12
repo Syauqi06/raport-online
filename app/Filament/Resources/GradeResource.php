@@ -111,13 +111,12 @@ class GradeResource extends Resource
                     ->required(),
                 Textarea::make('description')
                     ->label('Catatan Guru'),
-                ToggleColumn::make('is_locked')
+                Toggle::make('is_locked')
                     ->label('Status Kunci')
                     ->onColor('success')  // Hijau = Terkunci (Aman)
                     ->offColor('danger')  // Merah = Draft (Belum tampil)
                     ->onIcon('heroicon-s-lock-closed')
-                    ->offIcon('heroicon-s-lock-open')
-                    ->sortable(),
+                    ->offIcon('heroicon-s-lock-open'),
                 ]);
     }
 

@@ -22,8 +22,8 @@
 <body>
 
     <div class="header">
-        <h1>SMA Negeri 69 Ngawi Selatan</h1>
-        <p>Jl. Ngawi Selatan, Kec. Ngawi, Kabupaten Nguawi</p>
+        <h1>SD Negeri 1 Heavenhold</h1>
+        <p>Jl. Heavenhold, Kec. Heaven, Kota Heavenhold</p>
     </div>
 
     <table class="info-table">

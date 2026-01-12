@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use Filament\Notifications\Notification;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Illuminate\Support\Facades\Auth;
 
 class BackupManager extends Page
 {
@@ -22,6 +23,20 @@ class BackupManager extends Page
         /** @var \App\Models\User $user */
         $user = auth()->user();
         return $user->hasRole('admin');
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        return $user->hasRole('admin') && Auth::check();
+    }
+
+    public function mount(): void
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        abort_unless($user->hasRole('admin'), 403);
     }
 
     // Download File

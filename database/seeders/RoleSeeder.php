@@ -23,11 +23,31 @@ class RoleSeeder extends Seeder
         // Super Admin User
         $admin = User::create([
             'name' => 'Super Admin',
-            'email' => 'saulgoodman@gmail.com',
+            'email' => 'admin@gmail.com',
             'password' => 'password', // Password akan di-hash otomatis oleh model User
             'is_active' => true,
         ]);
 
         $admin->assignRole($roleAdmin); // Menetapkan peran admin ke user super admin
+
+        // Guru User
+        $guru = User::create([
+            'name' => 'Guru',
+            'email' => 'guru@gmail.com',
+            'password' => 'password', // Password akan di-hash otomatis oleh model User
+            'is_active' => true,
+        ]);
+
+        $guru->assignRole($roleGuru); // Menetapkan peran guru ke user guru
+
+        // // Siswa User
+        // $siswa = User::create([
+        //     'name' => 'Murid',
+        //     'email' => 'murid@gmail.com',
+        //     'password' => 'password', // Password akan di-hash otomatis oleh model User
+        //     'is_active' => true,
+        // ]);
+
+        // $siswa->assignRole($roleSiswa); // Menetapkan peran siswa ke user siswa
     }
 }

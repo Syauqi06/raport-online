@@ -26,10 +26,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            // ->login()
+            // ->login(CustomLogin::class)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Indigo,
             ])
+            ->brandName('SDN Heavenhold 1')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -54,5 +55,33 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+            // ->renderHook(
+            //     'panels::auth.login.form.after', // Posisi hook
+            //     fn () => Blade::render('
+            //         <style>
+            //             /* 1. Ganti Background Halaman */
+            //             body {
+            //                 background-image: url("https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=2064&auto=format&fit=crop"); 
+            //                 background-size: cover;
+            //                 background-position: center;
+            //                 background-repeat: no-repeat;
+            //             }
+
+            //             /* 2. Efek Glassmorphism pada Kotak Login */
+            //             .fi-simple-main-ctn {
+            //                 background-color: rgba(255, 255, 255, 0.85) !important; /* Putih Transparan */
+            //                 backdrop-filter: blur(10px); /* Efek Blur di belakang kotak */
+            //                 border-radius: 1.5rem; /* Sudut membulat */
+            //                 box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            //                 padding: 2rem;
+            //             }
+                        
+            //             /*Dark Mode Adjustment */
+            //             .dark .fi-simple-main-ctn {
+            //                 background-color: rgba(17, 24, 39, 0.85) !important;
+            //             }
+            //         </style>
+            //     ')
+            // );
     }
 }
